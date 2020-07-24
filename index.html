@@ -1,0 +1,30 @@
+<!<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<title>Matrix-Painter</title>
+  	<link rel="stylesheet" href="style.css" />
+ 	
+</head>
+<body>
+<div class="initial-settings" id="initialSettings">
+	<h1>Matrix painter</h1>
+	<p>Hello there, in this program you can create matrix's (two dimensional arrays), just by painting squares.</p>
+	<p>First you have to chose the size of your matrix,and then there will apear a canvas witth the number of squares you put set for. After that you chose a color and a character related to this color. The color will apear on your canvas wile  you are painting and once you finish, you can copy the canvas and get the matrix with the characters that you chose</p>
+	<form class="initial-form" id="initialForm">
+		<label for="horizontal">Number of horizontal squares:</label>
+		<input type="number" name="horizontal" id="horizontal">
+		<label for="vertical">Number of vertical squares:</label>
+		<input type="number" name="vertical" id="vertical">
+		<input type="submit" value="Create Canvas" id="create">
+	</form>
+</div>
+<div class="working-area" id="workingArea">
+	<div class="working-area-menu">
+	</div>
+	<div class="working-area-canvas" id="canvasDiv">
+	</div>
+</div>
+<script type="text/javascript" src="script.js" ></script>
+</body>

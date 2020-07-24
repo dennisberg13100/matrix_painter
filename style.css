@@ -1,0 +1,66 @@
+body {
+	background-color: #333;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+.initial-form {
+	display: flex;
+	flex-direction: column;
+}
+
+.initial-settings {
+	width: 100%;
+	max-width: 600px;
+	border-radius: 5px;
+	margin: auto;
+	margin-top: 50px;
+	background-color: #fff;
+	padding: 20px;
+}
+
+.initial-settings h1 {
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+input {
+	margin: 5px 0;
+	line-height: 30px;
+
+}
+
+input[type="number"]{
+	width: 50px;
+	padding-left: 5px;
+	font-size: 16px;
+}
+
+input[type='submit']{
+	height: 50px;
+	font-size: 16px;
+}
+
+.working-area {
+	display: none;
+	content: '';
+	width: 100%;
+	height: 100vh;
+	background-color: yellow;
+}
+
+.working-area-menu {
+	width: 250px;
+	background-color: #333;
+}
+
+.working-area-canvas {
+	flex:1;
+	background-color: red;
+}
+.working-area-canvas canvas {
+	background-color: #fff;
+	margin: auto;
+}
