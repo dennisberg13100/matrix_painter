@@ -2,14 +2,18 @@ const initialForm = document.getElementById('initialForm');
 const initialSettings =  document.getElementById('initialSettings');
 const workingArea = document.getElementById('workingArea');
 const canvasDiv = document.getElementById('canvasDiv');
-const canvasId = "canvas"
+const canvasId = "canvas";
+const colorMenu = document.getElementById("colorMenu");
+const matirxPreview = document.getElementById("matrixPreview");
 
 const settings = {
 	matrix: [],
 	squareSize: 0,
 	horizontalSquares: 0,
 	verticalSquares: 0,
-	colors: ["#FFFFFF"]
+	colors: ["#FFFFFF"], 
+	values: ["0"],
+	margin: 0,
 }
 
 // Create a new empty matrix filled with zeros
@@ -59,10 +63,59 @@ function createCanvas(div, canvasId, obj){
 
 }
 
+// Draw the color menu
+function drawColorMenu(colors, values, div) {
+	let content = "";
+	for( let i = 0; i < colors.length; i++){
+		content += '<div class="color-selector">';
+		content += '<div class="color-border">';
+		content += '<div class="color" style="background-color:' + colors[i] + ';"></div>';
+		content += '</div>';
+		content += '<div class="color-value">' + values[i] + '</div>';
+		content += '</div>';
+	}
+	div.innerHTML = content;
+}
+
+// Write the matrix preview in the matrixPreviw area 
+function writeMatrixInDiv(matrix, div) {
+	let content = "["
+	for(let i = 0; i < matrix.length; i++){
+		if( i != 0 ){
+			content += "&nbsp;[";
+		} else {
+			content += "[";
+		}
+		content += matrix[i];
+		content += "]";
+		if( i != (matrix.length-1)){
+			content += "</br>";
+		}
+	}
+	content += "]";
+
+	div.innerHTML = content;
+}
+
+// Make the actions when you click on the canvas
+function clickOnCanvas(e){
+	console.log(e)
+	let canvas = document.getElementById(canvasId).getBoundingClientRect();
+	x = e.screenX - canvas.x;
+	y = e.screenY - canvas.y;
+	console.log(x + " - " + y);
+	x = Math.floor(x / settings.squareSize);
+	y = Math.floor(y / settings.squareSize);
+	console.log(x + " - " + y);
+}
+
 // This redner function updates the whole working area each time that it's necessary (including margins and squaresizes)
 function renderWorkingArea(canvasDiv, canvasId, obj) {
 	createCanvas(canvasDiv, canvasId, obj);
 	renderCanvas(canvasId, obj);
+	document.getElementById('canvas').addEventListener('click', function(e){clickOnCanvas(e);});
+	writeMatrixInDiv(settings.matrix, matirxPreview);
+
 }
 
 // Draw the square
@@ -100,10 +153,34 @@ initialForm.onsubmit = function (e){
 		workingArea.style.display = 'flex';
 		settings.matrix = createNewMatrix(settings);
 		console.log(settings);
-		renderWorkingArea(canvasDiv, canvasId, settings)
+		renderWorkingArea(canvasDiv, canvasId, settings);
+		drawColorMenu(settings.colors, settings.values, colorMenu);
+
 	} else {
 		alert("Please fill in the amount of horizontal and vertical squares!");
 	}	
 };
 
+// Control that the canvas has the right  size after changing the size of the screen 
 window.addEventListener("resize", function(){renderWorkingArea(canvasDiv, canvasId, settings);}, true);
+
+// Zoom in and out 
+function zoom(e){
+	if(e.deltaY > 0 && settings.squareSize > 40){
+		console.log("ZOOM OUT");
+		canvasDiv.innerHTML = "";
+		marginDelta = 5
+		for( let i = 0; i < marginDelta; i++){
+			settings.margin += 1;
+			canvasDiv.style.margin = settings.margin;
+			setTimeout(function(){ renderWorkingArea(canvasDiv, canvasId, settings); }, 50);
+		}
+	} else if(e.deltaY < 0 && settings.margin > 0)  {
+		console.log("ZOOM IN")
+		canvasDiv.innerHTML = "";
+		settings.margin -= 5;
+		canvasDiv.style.margin = settings.margin;
+		renderWorkingArea(canvasDiv, canvasId, settings);
+	}
+}
+window.addEventListener('wheel', function(e) {zoom(e);}, false);
