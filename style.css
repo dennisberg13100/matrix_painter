@@ -138,6 +138,9 @@ input[type='submit']{
 	font-family: monospace;
 	font-size: 16px;
 	margin: 10px;
+	max-height: 200px;
+	white-space: nowrap;
+	overflow: auto;
 }
 
 .working-area-canvas {
@@ -149,4 +152,8 @@ input[type='submit']{
 	background-color: #fff;
 	margin: auto;
 	cursor: url(pencil.png) 0 32, default;
+}
+
+.selected {
+	background-color: #555;
 }

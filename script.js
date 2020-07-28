@@ -14,13 +14,12 @@ const settings = {
 	colors: ["#FFFFFF"], 
 	values: ["0"],
 	margin: 0,
+	selected: 0
 }
 
 // test function 
 function test(e){
-	let value = e.value;
-	let index =  e.getAttribute("data");
-	console.log("Value = "+value+" - Index = "+ index);
+	alert("test")
 }
 
 // Create a new empty matrix filled with zeros
@@ -69,26 +68,44 @@ function createCanvas(div, canvasId, obj){
 
 }
 
+// Define a color as selected 
+function selectColor(e) {
+	let elements = document.getElementsByClassName('selected');
+	while(elements.length > 0){
+	    elements[0].classList.remove('selected');
+	}
+	let index =  e.getAttribute("data");
+	console.log(index)
+	settings.selected = index;
+	e.classList.add("selected");
+	console.log(e);
+}
+
 // Draw the color menu
-function drawColorMenu(colors, values, div) {
+function drawColorMenu(colors, values, selected, div) {
 	let content = "";
 	let clr = "colors";
 	let val = "values";
+	console.log(content);
 	for( let i = 0; i < colors.length; i++){
-		content += '<div class="color-selector">';
+		content += '<div class="color-selector ';
+		if ( i == selected ){
+			content += 'selected';
+		}
+		content += '" data="' + i + '" onclick="selectColor(this)">';
 		content += '<div><input type="color" value="' + colors[i] + '" onchange="updateMatrixItem(this,'
 		content += "'colors'" + ')" data="' + i + '"></div>';
 		content += '<div><input type="text" value="' + values[i] + '" onkeyup="updateMatrixItem(this,'
 		content += "'values'" + ')" data="' + i + '"></div>';
 		content += '</div>';
 	}
+	console.log(content);
 	div.innerHTML = content;
 }
 
 // Write the matrix preview in the matrixPreviw area 
 function writeMatrixInDiv(matrix, values, div) {
-	let content = "["
-	console.log(values);
+	let content = "[";
 	for(let i = 0; i < matrix.length; i++){
 		if( i != 0 ){
 			content += "&nbsp;[";
@@ -96,7 +113,6 @@ function writeMatrixInDiv(matrix, values, div) {
 			content += "[";
 		}
 		for ( let j = 0; j < matrix[i].length; j++) {
-			console.log(matrix[i][j])
 			content += values[matrix[i][j]];
 			if ( j != (matrix[i].length - 1)){
 				content += ", ";
@@ -104,22 +120,24 @@ function writeMatrixInDiv(matrix, values, div) {
 		}
 		content += "]";
 		if( i != (matrix.length-1)){
-			content += "</br>";
+			content += ",</br>";
 		}
 	}
-	content += "]";
+	content += "]</br>&nbsp;";
 
 	div.innerHTML = content;
 }
 
 // Make the actions when you click on the canvas
 function clickOnCanvas(e){
-	console.log(e)
 	let canvas = document.getElementById(canvasId).getBoundingClientRect();
-	x = e.screenX - canvas.x;
-	y = e.screenY - canvas.y;
+	x = e.clientX - canvas.x;
+	y = e.clientY - canvas.y;
 	x = Math.floor(x / settings.squareSize);
 	y = Math.floor(y / settings.squareSize);
+	settings.matrix[x][y] = parseInt(settings.selected);
+	renderWorkingArea(canvasDiv, canvasId, settings);
+	console.log(settings.matrix);
 }
 
 // This function takes a Matrix a old value and a new value and it returns the new matrix with the new values in the place of teh old ones
@@ -150,6 +168,13 @@ function updateMatrixItem(e, colorValue){
 		console.log(settings)
 		renderWorkingArea(canvasDiv, canvasId, settings);
 	}	
+}
+
+// And a new color/value to the matrix 
+function addNewColor() {
+	settings.colors.push("#FFFFFF");
+	settings.values.push("0");
+	drawColorMenu(settings.colors, settings.values, settings.selected, colorMenu);
 }
 
 // This redner function updates the whole working area each time that it's necessary (including margins and squaresizes)
@@ -193,7 +218,7 @@ initialForm.onsubmit = function (e){
 		workingArea.style.display = 'flex';
 		settings.matrix = createNewMatrix(settings);
 		renderWorkingArea(canvasDiv, canvasId, settings);
-		drawColorMenu(settings.colors, settings.values, colorMenu);
+		drawColorMenu(settings.colors, settings.values, settings.selected, colorMenu);
 
 	} else {
 		alert("Please fill in the amount of horizontal and vertical squares!");
@@ -205,7 +230,7 @@ window.addEventListener("resize", function(){renderWorkingArea(canvasDiv, canvas
 
 // Zoom in and out 
 function zoom(e){
-	if(e.deltaY > 0 && settings.squareSize > 40){
+	if(e.deltaY > 0 && settings.squareSize > 10){
 		console.log("ZOOM OUT");
 		canvasDiv.innerHTML = "";
 		marginDelta = 5
