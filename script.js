@@ -16,6 +16,13 @@ const settings = {
 	margin: 0,
 }
 
+// test function 
+function test(e){
+	let value = e.value;
+	let index =  e.getAttribute("data");
+	console.log("Value = "+value+" - Index = "+ index);
+}
+
 // Create a new empty matrix filled with zeros
 function createNewMatrix(obj) {
 	let matrix = [];
@@ -26,7 +33,6 @@ function createNewMatrix(obj) {
 			matrix[i].push(0)
 		}
 	}
-    console.log(matrix)
 	return matrix;
 }
 
@@ -66,27 +72,36 @@ function createCanvas(div, canvasId, obj){
 // Draw the color menu
 function drawColorMenu(colors, values, div) {
 	let content = "";
+	let clr = "colors";
+	let val = "values";
 	for( let i = 0; i < colors.length; i++){
 		content += '<div class="color-selector">';
-		content += '<div class="color-border">';
-		content += '<div class="color" style="background-color:' + colors[i] + ';"></div>';
-		content += '</div>';
-		content += '<div class="color-value">' + values[i] + '</div>';
+		content += '<div><input type="color" value="' + colors[i] + '" onchange="updateMatrixItem(this,'
+		content += "'colors'" + ')" data="' + i + '"></div>';
+		content += '<div><input type="text" value="' + values[i] + '" onkeyup="updateMatrixItem(this,'
+		content += "'values'" + ')" data="' + i + '"></div>';
 		content += '</div>';
 	}
 	div.innerHTML = content;
 }
 
 // Write the matrix preview in the matrixPreviw area 
-function writeMatrixInDiv(matrix, div) {
+function writeMatrixInDiv(matrix, values, div) {
 	let content = "["
+	console.log(values);
 	for(let i = 0; i < matrix.length; i++){
 		if( i != 0 ){
 			content += "&nbsp;[";
 		} else {
 			content += "[";
 		}
-		content += matrix[i];
+		for ( let j = 0; j < matrix[i].length; j++) {
+			console.log(matrix[i][j])
+			content += values[matrix[i][j]];
+			if ( j != (matrix[i].length - 1)){
+				content += ", ";
+			}
+		}
 		content += "]";
 		if( i != (matrix.length-1)){
 			content += "</br>";
@@ -103,10 +118,38 @@ function clickOnCanvas(e){
 	let canvas = document.getElementById(canvasId).getBoundingClientRect();
 	x = e.screenX - canvas.x;
 	y = e.screenY - canvas.y;
-	console.log(x + " - " + y);
 	x = Math.floor(x / settings.squareSize);
 	y = Math.floor(y / settings.squareSize);
-	console.log(x + " - " + y);
+}
+
+// This function takes a Matrix a old value and a new value and it returns the new matrix with the new values in the place of teh old ones
+function updateMatrixValues(matrix, oldValue, newValue) {
+	for (let i = 0; i < matrix.length; i++){
+		for (let j = 0; j < matrix[i].length; j++) {
+			if( matrix[i][j] == oldValue) {
+				matrix[i][j] = newValue;
+			}
+		}
+	}
+	return matrix;
+}
+
+// Update de Color or the value from a matrix item (the second variable tells if the item is a color or a value)
+function updateMatrixItem(e, colorValue){
+	let value = e.value;
+	let index =  e.getAttribute("data");
+	let oldValue = settings.values[index];
+	console.log(oldValue);
+	if (value != "") {
+		if (colorValue == "colors"){
+			settings.colors[index] = value;
+		} else {
+			// settings.matrix = updateMatrixValues(settings.matrix, oldValue, value);
+			settings.values[index] = value;
+		}
+		console.log(settings)
+		renderWorkingArea(canvasDiv, canvasId, settings);
+	}	
 }
 
 // This redner function updates the whole working area each time that it's necessary (including margins and squaresizes)
@@ -114,13 +157,11 @@ function renderWorkingArea(canvasDiv, canvasId, obj) {
 	createCanvas(canvasDiv, canvasId, obj);
 	renderCanvas(canvasId, obj);
 	document.getElementById('canvas').addEventListener('click', function(e){clickOnCanvas(e);});
-	writeMatrixInDiv(settings.matrix, matirxPreview);
-
+	writeMatrixInDiv(settings.matrix, settings.values, matirxPreview);
 }
 
 // Draw the square
 function drawSquare(x, y, color, squareSize, ctx) {
-	console.log(color);
 	ctx.fillStyle = color;
 	ctx.fillRect(x*squareSize , y*squareSize , squareSize , squareSize );
 
@@ -130,7 +171,6 @@ function drawSquare(x, y, color, squareSize, ctx) {
 
 // This function update just what is inside the canvas
 function renderCanvas(canvasId, obj) {
-	console.log(obj);
 	const cvs = document.getElementById(canvasId); 
 	const ctx = cvs.getContext("2d");
 	for(let i = 0; i < obj.horizontalSquares ; i++){
@@ -152,7 +192,6 @@ initialForm.onsubmit = function (e){
 		initialSettings.style.display = 'none';
 		workingArea.style.display = 'flex';
 		settings.matrix = createNewMatrix(settings);
-		console.log(settings);
 		renderWorkingArea(canvasDiv, canvasId, settings);
 		drawColorMenu(settings.colors, settings.values, colorMenu);
 
