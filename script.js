@@ -22,13 +22,12 @@ const paintHistory = {
 	undoIndex: -1,
 }
 
-// Create a new empty matrix filled with zeros
-function createNewMatrix(obj) {
+function createNewMatrixFilledWithZeros() {
 	let matrix = [];
 
-	for ( i = 0; i < obj.verticalSquares; i++){
+	for ( i = 0; i < settings.verticalSquares; i++){
 		matrix.push([]);
-		for (j = 0; j < obj.horizontalSquares; j++){
+		for (j = 0; j < settings.horizontalSquares; j++){
 			matrix[i].push(0)
 		}
 	}
@@ -36,42 +35,38 @@ function createNewMatrix(obj) {
 	return matrix;
 }
 
-// Create a canvas in the div thas is passed in the function for specific size of the horizontal and vetical squares
-function createCanvas(div, canvasId, obj){
-	div.innerHTML = '';
-	divInfo = div.getBoundingClientRect();
-	divWidth = divInfo.width;
-	divHeight = divInfo.height; 
-
+function createCanvas(){
+	canvasDiv.innerHTML = '';
+	let divInfo = canvasDiv.getBoundingClientRect();
+	let divWidth = divInfo.width;
+	let divHeight = divInfo.height; 
 	
-	// Here we check the largest possible size to make the canvas wit the squares so taht it stays square
-	if(divWidth / obj.horizontalSquares < divHeight / obj.verticalSquares) {
-		obj.squareSize = divWidth / obj.horizontalSquares;
-		canvasWidht = divWidth;
-		canvasHeight = obj.squareSize * obj.verticalSquares;
-	} else {
-		obj.squareSize = divHeight / obj.verticalSquares
-		canvasWidht = obj.squareSize * obj.horizontalSquares;
-		canvasHeight = divHeight;
-	}
-
-	// Create the canvas
-	div.innerHTML = '<canvas id=' + canvasId + ' width=' + canvasWidht + ' height=' + canvasHeight + '></canvas>';
-
-	// Add margin to the canvas
-	marginVertival = (divHeight - (obj.verticalSquares * obj.squareSize)) / 2;
-	marginHorizontal = (divWidth - (obj.horizontalSquares * obj.squareSize)) / 2;
-
-	div.style.paddingTop =  marginVertival;
-	div.style.paddingBottom =  marginVertival;
-	div.style.paddingLeft =  marginHorizontal;
-	div.style.paddingRight =  marginHorizontal;
-
+	calculateSquaresSizes(divHeight, divWidth);
+	canvasHeight = settings.squareSize * settings.verticalSquares;
+	canvasWidht = settings.squareSize * settings.horizontalSquares;
+	canvasDiv.innerHTML = '<canvas id=' + canvasId + ' width=' + canvasWidht + ' height=' + canvasHeight + '></canvas>';
+	addMarginToCanvas(divHeight, divWidth);
 }
 
-// Define a color as selected 
-function selectColor(e) {
+function calculateSquaresSizes(divHeight, divWidth){
+	if(divWidth / settings.horizontalSquares < divHeight / settings.verticalSquares) {
+		settings.squareSize = divWidth / settings.horizontalSquares;
+	} else {
+		settings.squareSize = divHeight / settings.verticalSquares
+	}
+}
 
+function addMarginToCanvas(divHeight, divWidth) {
+	marginVertival = (divHeight - (settings.verticalSquares * settings.squareSize)) / 2;
+	marginHorizontal = (divWidth - (settings.horizontalSquares * settings.squareSize)) / 2;
+
+	canvasDiv.style.paddingTop =  marginVertival;
+	canvasDiv.style.paddingBottom =  marginVertival;
+	canvasDiv.style.paddingLeft =  marginHorizontal;
+	canvasDiv.style.paddingRight =  marginHorizontal;
+}
+
+function selectColor(e) {
 	let elements = document.getElementsByClassName('selected');
 
 	while(elements.length > 0){
@@ -82,70 +77,67 @@ function selectColor(e) {
 	e.classList.add("selected");
 }
 
-// Draw the color menu
-function drawColorMenu(colors, values, selected, div) {
+function drawColorMenu() {
 	let content = "";
 	
-	for( let i = 0; i < colors.length; i++){
+	for( let i = 0; i < settings.colors.length; i++){
 		content += '<div class="color-selector ';
-		if ( i == selected ){
+		if ( i == settings.selected ){
 			content += 'selected';
 		}
 		content += '" data="' + i + '" onclick="selectColor(this)">';
-		content += '<div><input type="color" value="' + colors[i] + '" onchange="updateMatrixItem(this,'
+		content += '<div><input type="color" value="' + settings.colors[i]; 
+		content += '" onchange="updateMatrixItem(this,';
 		content += "'colors'" + ')" data="' + i + '"></div>';
-		content += '<div><input type="text" value="' + values[i] + '" onkeyup="updateMatrixItem(this,'
+		content += '<div><input type="text" value="' + settings.values[i]; 
+		content += '" onkeyup="updateMatrixItem(this,';
 		content += "'values'" + ')" data="' + i + '"></div>';
 		content += '</div>';
 	}
 
-	div.innerHTML = content;
+	colorMenu.innerHTML = content;
 }
 
-// Write the matrix preview in the matrixPreviw area 
-function writeMatrixInDiv(matrix, values, div) {
-
+function writeMatrixInMatirxPreview() {
 	let content = "[";
 
-	for(let i = 0; i < matrix.length; i++){
-
+	for(let i = 0; i < settings.matrix.length; i++){
 		if( i != 0 ){
 			content += "&nbsp;[";
 		} else {
 			content += "[";
 		}
 
-		for ( let j = 0; j < matrix[i].length; j++) {
-			content += values[matrix[i][j]];
-			if ( j != (matrix[i].length - 1)){
+		for ( let j = 0; j < settings.matrix[i].length; j++) {
+			content += settings.values[settings.matrix[i][j]];
+			if ( j != (settings.matrix[i].length - 1)){
 				content += ", ";
 			}
 		}
 
 		content += "]";
 
-		if( i != (matrix.length-1)){
+		if( i != (settings.matrix.length-1)){
 			content += ",</br>";
 		}
 	}
 	content += "]</br>&nbsp;";
 
-	div.innerHTML = content;
+	matirxPreview.innerHTML = content;
 }
 
-// Make the actions when you click on the canvas
-function clickOnCanvas(e){
+function onClickOnCanvas(e){
 	let canvas = document.getElementById(canvasId).getBoundingClientRect();
 	let x = e.clientX - canvas.x;
 	let y = e.clientY - canvas.y;
 
 	x = Math.floor(x / settings.squareSize);
 	y = Math.floor(y / settings.squareSize);
-	position = [x, y];
+	position = [y, x];
 	addChangeToHistory(position);
 	paintHistory.stepList = paintHistory.stepList.slice(0,(paintHistory.undoIndex +1))
-	settings.matrix[x][y] = parseInt(settings.selected);
-	renderWorkingArea(canvasDiv, canvasId, settings);
+	settings.matrix[y][x] = parseInt(settings.selected);
+	renderWorkingArea();
 }
 
 function addChangeToHistory (position) {
@@ -160,52 +152,39 @@ function addChangeToHistory (position) {
 
 }
 
-// This function takes a Matrix a old value and a new value and it returns the new matrix with the new values in the place of teh old ones
-function updateMatrixValues(matrix, oldValue, newValue) {
-	for (let i = 0; i < matrix.length; i++){
-		for (let j = 0; j < matrix[i].length; j++) {
-			if( matrix[i][j] == oldValue) {
-				matrix[i][j] = newValue;
-			}
-		}
-	}
-	return matrix;
-}
-
 // Update de Color or the value from a matrix item (the second variable tells if the item is a color or a value)
 function updateMatrixItem(e, colorValue){
 	let value = e.value;
 	let index =  e.getAttribute("data");
-	let oldValue = settings.values[index];
 	if (value != "") {
 		if (colorValue == "colors"){
 			settings.colors[index] = value;
 		} else {
-			// settings.matrix = updateMatrixValues(settings.matrix, oldValue, value);
 			settings.values[index] = value;
 		}
-		renderWorkingArea(canvasDiv, canvasId, settings);
+		renderWorkingArea();
 	}	
 }
 
-// And a new color/value to the matrix 
-function addNewColor() {
+function addNewColorButtonAction() {
 	settings.colors.push("#FFFFFF");
 	settings.values.push("0");
 
 	drawColorMenu(settings.colors, settings.values, settings.selected, colorMenu);
 }
 
-// This redner function updates the whole working area each time that it's necessary (including margins and squaresizes)
-function renderWorkingArea(canvasDiv, canvasId, obj) {
-	createCanvas(canvasDiv, canvasId, obj);
-	renderCanvas(canvasId, obj);
-	document.getElementById('canvas').addEventListener('click', function(e){clickOnCanvas(e);});
-	writeMatrixInDiv(settings.matrix, settings.values, matirxPreview);
+function renderWorkingArea() {
+	createCanvas();
+	renderCanvas();
+	document.getElementById('canvas').addEventListener('click', function(e){onClickOnCanvas(e);});
+	writeMatrixInMatirxPreview();
 }
 
-// Draw the square
-function drawSquare(x, y, color, squareSize, ctx) {
+function drawSquare(x, y, color) {
+	const cvs = document.getElementById(canvasId); 
+	const ctx = cvs.getContext("2d");
+	let squareSize = settings.squareSize;
+	
 	ctx.fillStyle = color;
 	ctx.fillRect(x*squareSize , y*squareSize , squareSize , squareSize );
 
@@ -213,31 +192,25 @@ function drawSquare(x, y, color, squareSize, ctx) {
 	ctx.strokeRect(x*squareSize , y*squareSize , squareSize , squareSize );
 }
 
-// This function update just what is inside the canvas
-function renderCanvas(canvasId, obj) {
-	const cvs = document.getElementById(canvasId); 
-	const ctx = cvs.getContext("2d");
+function renderCanvas() {
 
-	for(let i = 0; i < obj.horizontalSquares ; i++){
-		for(let j = 0; j < obj.verticalSquares; j++){
-			index = obj.matrix[i][j];
-			drawSquare(i, j, obj.colors[index], obj.squareSize, ctx);
+	for(let i = 0; i < settings.horizontalSquares ; i++){
+		for(let j = 0; j < settings.verticalSquares; j++){
+			index = settings.matrix[i][j];
+			drawSquare(j, i, settings.colors[index]);
 		}
 	}
 }
 
-// Hide the instructions page and show the working area 
 initialForm.onsubmit = function (e){
 	e.preventDefault();
-
-	// Get the number of vetical and horizontal squares
 	settings.horizontalSquares = document.getElementById('horizontal').value;
 	settings.verticalSquares = document.getElementById('vertical').value;
 	if ( settings.horizontalSquares > 0 && settings.verticalSquares > 0){
 		initialSettings.style.display = 'none';
 		workingArea.style.display = 'flex';
-		settings.matrix = createNewMatrix(settings);
-		renderWorkingArea(canvasDiv, canvasId, settings);
+		settings.matrix = createNewMatrixFilledWithZeros();
+		renderWorkingArea();
 		drawColorMenu(settings.colors, settings.values, settings.selected, colorMenu);
 
 	} else {
@@ -245,10 +218,9 @@ initialForm.onsubmit = function (e){
 	}	
 };
 
-// Control that the canvas has the right  size after changing the size of the screen 
-window.addEventListener("resize", function(){renderWorkingArea(canvasDiv, canvasId, settings);}, true);
+// Redraw the canvas on the right size after changing the size of the canvas
+window.addEventListener("resize", function(){renderWorkingArea();}, true);
 
-// Zoom in and out 
 function zoom(e){
 	if(e.deltaY > 0 && settings.squareSize > 10){
 		canvasDiv.innerHTML = "";
@@ -264,14 +236,13 @@ function zoom(e){
 		settings.margin -= 5;
 		canvasDiv.style.margin = settings.margin;
 
-		renderWorkingArea(canvasDiv, canvasId, settings);
+		renderWorkingArea();
 	}
 }
 
 window.addEventListener('wheel', function(e) {zoom(e);}, false);
  
 
-// ctrl+z function 
 document.addEventListener('keydown', (e) => {keyPress(e);});
 
 function keyPress(e){
@@ -281,8 +252,7 @@ function keyPress(e){
 	} else if(e.keyCode === 90 && e.ctrlKey === true && e.shiftKey === true){
 		e.preventDefault();
 		redoStep(e);
-	}
-	
+	}	
 }
 
 function undoStep(e){
@@ -292,15 +262,14 @@ function undoStep(e){
 		let data = paintHistory.stepList[index];
 		settings.matrix[data.position[0]][data.position[1]] = data.oldValue;
 		paintHistory.undoIndex -= 1;
-		renderCanvas(canvasId, settings);
+		renderCanvas();
 	} else if (paintHistory.undoIndex === 0) {
-		settings.matrix = createNewMatrix(settings);
+		settings.matrix = createNewMatrixFilledWithZeros();
 		paintHistory.undoIndex == -1;
-		renderCanvas(canvasId, settings);
+		renderCanvas();
 	}
 }
 
-// Now working 100% 
 function redoStep(e) {
 	e.preventDefault();
 	if ((paintHistory.stepList.length - 1) > paintHistory.undoIndex) {
@@ -308,6 +277,6 @@ function redoStep(e) {
 		let index = paintHistory.undoIndex;
 		let data = paintHistory.stepList[index];
 		settings.matrix[data.position[0]][data.position[1]] = data.newValue;
-		renderCanvas(canvasId, settings);
+		renderCanvas();
 	}
 }
